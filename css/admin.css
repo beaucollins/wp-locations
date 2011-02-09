@@ -1,0 +1,6 @@
+#ri-map-control { height:400px;}
+#ri-locate-textbox { position:relative; margin-right:65px; margin-bottom:5px;}
+#ri-locate-field { width:100%; }
+#ri-locate-submit { position:absolute; right:-65px; top:0; }
+#ri-address { margin:10px 0;}
+#ri-formatted-address { display:block; max-width:100%; min-width:100%; width:100%;}

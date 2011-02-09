@@ -36,19 +36,18 @@ function ri_init() {
 add_action( 'generate_rewrite_rules', 'ri_rewrite_rules' );
 
 function ri_rewrite_rules( $wp_rewrite ){
-  $wp_rewrite->add_rule('locations/?$', 'index.php?post_type=ri_location', 'top');
+  $wp_rewrite->rules = array_merge(array('locations/?$' => 'index.php?post_type=ri_location'), $wp_rewrite->rules);
 }
 
 add_action( 'template_redirect', 'ri_index_template' );
 
 function ri_index_template(){
   global $wp_query;
-  echo "<pre>";
-  print_r($wp_query);
-  print_r($_GET);
-  echo "</pre>";
-  die('Heelo');
-  
+  if ( !is_single() && get_query_var('post_type') == 'ri_location' ) {
+    // use the arhive-ri_location.php template
+    // first look for it in the theme
+    // then use the built in one
+  }  
 }
 
 add_action( 'admin_init', 'ri_admin_init' );

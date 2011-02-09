@@ -4,3 +4,8 @@
 #ri-locate-submit { position:absolute; right:-65px; top:0; }
 #ri-address { margin:10px 0;}
 #ri-formatted-address { display:block; max-width:100%; min-width:100%; width:100%;}
+
+#ri-address p { float:left; width:22%; }
+#ri-address p.full-width { width:100%; }
+#ri-address p.full-width input { width:98%;}
+#ri-address:after { content:'.'; display:block; clear:both; height:0; visibility:hidden;}

@@ -4,21 +4,22 @@
 
     return this.map(function(){
       var $t = $(this);
+			var marker;
       if($t.data('marker')){
-        return $t.data('marker');
-      }
+        marker = $t.data('marker');
+      }else{
+	      var address = $(this).toAddress()[0];
+		    marker = new google.maps.Marker({
+	        clickable: true,
+	        title: address.name,
+	        position: new google.maps.LatLng(address.geo.lat, address.geo.lng),
+	      });
+	      $t.data('marker', marker);
+	  	}
       
-      var address = $(this).toAddress()[0];
-      var marker = new google.maps.Marker({
-        clickable: true,
-        title: address.name,
-        position: new google.maps.LatLng(address.geo.lat, address.geo.lng),
-      });
       if(onMarkerClick){
-        
         google.maps.event.addListener(marker, 'click', onMarkerClick);
       }
-      $t.data('marker', marker);
       return marker;
     })
   };
@@ -59,16 +60,30 @@
   }
   
   $.fn.plot = function(map, onMarkerClick){
-    this.toMarker(onMarkerClick).each(function(){
-      this.setMap(map);
-    });
-    return this;
-    
+    return this.toMarker().each(function(){
+      if(this.getMap() != map){
+				this.setMap(map);
+				google.maps.event.addListener(this, 'click', onMarkerClick);
+			}
+    });    
   };
+
+	$.fn.unplot = function(){
+		return this.toMarker().each(function(){
+			this.setMap(null);
+			google.maps.event.clearInstanceListeners(this);
+		});
+	}
   
   $.fn.withinBounds = function(bounds){
     return this.filter(function(){
       return bounds.contains($(this).toMarker()[0].getPosition());
+    });
+  }
+
+  $.fn.outsideBounds = function(bounds){
+    return this.filter(function(){
+      return !bounds.contains($(this).toMarker()[0].getPosition());
     });
   }
   
@@ -80,10 +95,7 @@
   }
   
   $.fn.distanceFrom = function(origin){
-    var p1 = origin;
-    var p2 = this.toMarker()[0].getPosition();
-		google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
-    return d;
+    return google.maps.geometry.spherical.computeDistanceBetween(origin, this.toMarker()[0].getPosition());
   }
   
   $.fn.byDistanceFrom = function(coords){
@@ -93,6 +105,18 @@
       return d1 > d2 ? 1 : d2 > d1 ? -1 : 0;
     });
   }
+
+	$.fn.eachByDistance = function(point, fn){
+		return this.byDistanceFrom().each(function(index){
+			fn.call(this, $(this).distanceFrom(point), index, this);
+		});
+	}
+	
+	$.fn.eachByMiles = function(point, fn){
+		return this.byDistanceFrom().each(function(index){
+			fn.call(this, $(this).distanceFrom(point)/1609.344, index, this);
+		});
+	}
   
   $.fn.sort = function(fun){
     return $(this.get().sort(fun));

@@ -10,13 +10,17 @@ Stable tag: 0.1
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
 
-require_once(plugin_dir_path(__FILE__) . 'lib/address.class.php');
+require_once(plugin_dir_path(__FILE__) . 'lib/location.class.php');
 
 add_action( 'init', 'ri_init' );
 
 function ri_init() {
   global $wp_rewrite;
-  wp_register_script('ri-google-maps', 'http://maps.google.com/maps/api/js?sensor=false');
+  wp_register_script('ri-google-maps', 'http://maps.google.com/maps/api/js?libraries=geometry&sensor=false');
+  wp_register_script('ri-jquery-map', plugin_dir_url(__FILE__) . 'javascript/jquery-map.js');
+  wp_enqueue_script('jquery');
+  wp_enqueue_script('ri-google-maps');
+  wp_enqueue_script('ri-jquery-map');
   wp_register_style('ri-map-admin', plugin_dir_url(__FILE__) . 'css/admin.css');
   register_post_type( 'ri_location', array(
     'labels' => array(
@@ -66,23 +70,28 @@ function is_ri_location_archive() {
 function ri_formatted_address($p = nil) {
   global $post;
   if( $p === nil ) $p = $post;
-  if($address = get_post_meta($p->ID, 'ri_formatted_address')){
-   echo preg_replace('/\n/',"<br/>", $address[0]);
-  }
-  
+  $address = ri_location_for_post($p->ID);
+  ?>
+  <span class="address">
+    <span class="street-address"><?php echo $address->street_address ?></span>
+    <span class="locality"><?php echo $address->locality ?></span>
+    <abbr title="<?php echo $address->region_name; ?>"><?php echo $address->region_abbreviation ?></abbr>
+    <span class="postal-code"><?php echo $address->postal_code ?></span>
+    <span class="country"><?php echo $address->country_name ?></span>
+  </span>
+  <?php
 }
 
 function ri_geo($p = nil){
   global $post;
   if( $p === nil ) $p = $post;
   
-  $lat = get_post_meta($p->ID, 'ri_lat');
-  $lng = get_post_meta($p->ID, 'ri_lng');
-  if( $lat && $lng ){
+  $address = ri_location_for_post($p->ID);
+  if( $address->hasLocation() ){
     ?>
     <span class="geo">
-      <span class="latitude"><?php echo $lat[0] ?></span>
-      <span class="longitude"><?php echo $lng[0] ?></span>
+      <span class="latitude"><?php echo $address->lat ?></span>
+      <span class="longitude"><?php echo $address->lng?></span>
     </span>
     <?php
   }
@@ -93,7 +102,7 @@ function ri_location_for_post($post_id = nil){
   global $post;
   if($post_id === nil) $post_id = $post->ID;
   
-  return new RI_Address($post_id);
+  return new RI_Location($post_id);
   
 }
 

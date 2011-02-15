@@ -9,3 +9,6 @@
 #ri-address p.full-width { width:100%; }
 #ri-address p.full-width input { width:98%;}
 #ri-address:after { content:'.'; display:block; clear:both; height:0; visibility:hidden;}
+
+
+#ri-admin-map { height:480px; width:640px; }

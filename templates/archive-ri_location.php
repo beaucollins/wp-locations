@@ -36,9 +36,10 @@ function ri_map_style(){
 <script type="text/javascript" charset="utf-8">
 (function($){
   $(document).ready(function(){
-
+    <?php $default_map_view = ri_default_map_settings(); ?>
     var map = new google.maps.Map(document.getElementById('ri-map'), {
-      'zoom' : 3,
+      'zoom' : <?php echo $default_map_view['zoom'] ;?>,
+      'center' : new google.maps.LatLng(<?php echo $default_map_view['lat'] ?>, <?php echo $default_map_view['lng'];?> ),
       'mapTypeId' : google.maps.MapTypeId.ROADMAP
     });
     
@@ -58,7 +59,6 @@ function ri_map_style(){
       });
     });
     
-    map.setCenter(new google.maps.LatLng(-47,0));
     
     $('#ri-map-search-form form').submit(function(e){
       e.preventDefault();
@@ -86,7 +86,6 @@ function ri_map_style(){
                                   });
               $('#ri-map').bind('map.marker-clicked', function(event, clicked_marker){
                 //
-                console.log("cliced", clicked_marker, marker);
                 if(clicked_marker == marker){
                   result_item.addClass('current');
                 }else{
@@ -96,7 +95,6 @@ function ri_map_style(){
               
             })
         }else{
-          console.log("Result:", status);
         };
       });
     });

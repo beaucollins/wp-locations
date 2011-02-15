@@ -98,6 +98,10 @@ function ri_geo($p = nil){
   
 }
 
+function ri_default_map_settings(){
+  return get_option('ri-location-position', array('lat' => '38.13', 'lng' => '-94.13', 'zoom' => '3' ));
+}
+
 function ri_location_for_post($post_id = nil){
   global $post;
   if($post_id === nil) $post_id = $post->ID;
@@ -112,6 +116,107 @@ function ri_admin_init() {
   wp_enqueue_script('ri-google-maps');
   wp_enqueue_style('ri-map-admin');
   add_meta_box( 'ri-location', 'Location', 'ri_admin_map', 'ri_location'  );  
+}
+
+add_action( 'admin_menu', 'ri_admin_menu' );
+
+function ri_admin_menu(){
+  add_submenu_page('edit.php?post_type=ri_location', 'Location Settings', 'Settings', 'manage_options', 'rilocation_settings', 'ri_location_settings');  
+}
+
+function ri_location_settings(){
+  if(!current_user_can('manage_options')){
+    wp_die( __('You do not have sufficient permissions to access this page.') );
+  }
+  
+  if ( $_SERVER['REQUEST_METHOD'] == 'POST' && wp_verify_nonce( $_POST['rilocation_nonce'], plugin_basename(__FILE__) )  ) {
+    $position = $_POST['riposition'];
+    update_option('ri-location-position', $position);
+    ?>
+    <div class="updated"><p><strong><?php _e('Location settings saved.', 'rilocation' ); ?></strong></p></div>    
+    <?php
+  }else{
+    $position = ri_default_map_settings();
+    
+  }
+  
+  ?>
+  <div class="wrap">
+    <h2><?php echo __( 'Location Settings', 'rilocation') ?></h2>
+    <form name="ri_location_settings" method="post" action="">
+      <div>
+        <?php wp_nonce_field( plugin_basename(__FILE__), 'rilocation_nonce' );?>
+        <input type="hidden" value="<?php echo $position['lat'];?>" name="riposition[lat]" />
+        <input type="hidden" value="<?php echo $position['lng'];?>" name="riposition[lng]" />
+        <input type="hidden" value="<?php echo $position['zoom'];?>" name="riposition[zoom]" />
+      </div>
+      <table class="form-table">
+        <tbody>
+          <tr valign="top">
+            <th scope="row">Default Map View</th>
+            <td>
+              <div id="map_search">
+                <input type="text" size="70" id="ri-settings-map-search-field" />
+                <input type="submit" value="Search" class="button" id="ri-map-search">
+              </div>
+              <div id="ri-admin-map"></div>
+              <span class="description">Position the map and set the zoom level for the default map view.</span>
+              <script type="text/javascript" charset="utf-8">
+                var m = new google.maps.Map(document.getElementById('ri-admin-map'), {
+                  mapTypeId: google.maps.MapTypeId.ROADMAP,
+                  center:new google.maps.LatLng(<?php echo $position['lat'] ;?>, <?php echo $position['lng'] ;?>),
+                  zoom:<?php echo $position['zoom']; ?>
+                });
+                
+                var geocoder = new google.maps.Geocoder;
+                
+                var searchmap = function(){
+                  var q = jQuery('#ri-settings-map-search-field').val();
+                  geocoder.geocode({'address':q, 'bounds': m.getBounds() }, function(results, status){
+                    
+                    if (status == google.maps.GeocoderStatus.OK) {
+                     
+                     m.setCenter(results[0].geometry.location);
+                     m.setZoom(14);
+                      
+                    }
+                    
+                  });
+                }
+                
+                google.maps.event.addListener(m, 'center_changed', function(){
+                  var c = m.getCenter();
+                  jQuery('[name="riposition[lat]"]').val(c.lat());
+                  jQuery('[name="riposition[lng]"]').val(c.lng());
+                  
+                });
+                google.maps.event.addListener(m, 'zoom_changed', function(){
+                  jQuery('[name="riposition[zoom]"]').val(m.getZoom());
+                });
+                
+                jQuery('#ri-map-search').click(function(e){
+                  e.preventDefault();
+                  searchmap();
+                })
+                
+                jQuery('#ri-settings-map-search-field').keypress(function(e){
+                  if (e.which == 13) {
+                    e.preventDefault();
+                    searchmap();
+                  };
+                })
+                
+              </script>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="submit">
+        <input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ;?>" />
+      </p>
+    </form>
+  </div>
+  <?php
 }
 
 add_action( 'save_post', 'ri_location_save', 10, 2 );

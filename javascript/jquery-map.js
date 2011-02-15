@@ -24,6 +24,12 @@
     })
   };
   
+	$.fn.eachWithMarker = function(fn){
+		return this.each(function(i, element){
+			fn.call(this, $(this).toMarker()[0], i, element);
+		});
+	}
+
   $.fn.toAddress = function(){
     return this.map(function(){
       var $t = $(this);
@@ -63,7 +69,7 @@
     return this.toMarker().each(function(){
       if(this.getMap() != map){
 				this.setMap(map);
-				google.maps.event.addListener(this, 'click', onMarkerClick);
+				if(onMarkerClick) google.maps.event.addListener(this, 'click', onMarkerClick);
 			}
     });    
   };
@@ -113,7 +119,7 @@
 	}
 	
 	$.fn.eachByMiles = function(point, fn){
-		return this.byDistanceFrom().each(function(index){
+		return this.byDistanceFrom(point).each(function(index){
 			fn.call(this, $(this).distanceFrom(point)/1609.344, index, this);
 		});
 	}

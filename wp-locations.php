@@ -74,7 +74,7 @@ function ri_formatted_address($p = nil) {
   ?>
   <span class="address">
     <span class="street-address"><?php echo $address->street_address ?></span>
-    <span class="locality"><?php echo $address->locality ?></span>
+    <span class="locality"><?php echo $address->locality ?></span>,
     <abbr title="<?php echo $address->region_name; ?>"><?php echo $address->region_abbreviation ?></abbr>
     <span class="postal-code"><?php echo $address->postal_code ?></span>
     <span class="country"><?php echo $address->country_name ?></span>

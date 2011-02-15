@@ -4,44 +4,23 @@ add_action('wp_head', 'ri_map_style');
 
 function ri_map_style(){
   ?>
-  <style type="text/css" media="screen">
+<style type="text/css" media="screen">
   
-    #ri-locations:after {
-      content: '.';
-      clear:both;
-      display:block;
-      height:0;
-      visibility:hidden;
-    }
-    #ri-map {
-      height:480px;
-      float: right;
-      width: 640px;
-    }
-    
-    #ri-map-search {
-      float:left;
-      width: 300px;
-      background:#EEE;
-    }
-    
-    #ri-map-search-form {
-      position:relative;
-      margin-right:70px;
-    }
-    
-    #ri-search {
-      display:block;
-      width:100%;
-    }
-    
-    #ri-search-submit {
-      position:absolute;
-      right:-65px;
-      top:0;
-    }
-    
-  </style>
+  #ri-locations:after                 { content: '.'; clear:both; display:block; height:0; visibility:hidden; }
+  #ri-map                             { height:480px; float: right; width: 640px; }
+  #ri-map-search                      { float:left; width: 300px; background:#EEE; }
+  #ri-map-search-form                 { position:relative; margin-right:70px; }
+  #ri-search                          { display:block; width:100%; }
+  #ri-search-submit                   { position:absolute; right:-65px; top:0; }
+  #ri-map-search-results .current     { background:#FD999B; }
+  #ri-map-search-results .ri-map-result { padding:5px; position:relative; }
+  .ri-map-result a.url                  { display:block; font-size:14px;}
+  .ri-map-result .address             { display:block; }
+  .address .geo    { display:none; }
+  .ri-map-result .street-address     { display:block; }
+  .ri-map-result .country           { display:none; }
+  .ri-result-distance { position:absolute; top:2px; right:2px; background:#CCC;}
+</style>
   <?php
 }
 
@@ -58,22 +37,18 @@ function ri_map_style(){
     
     var geocoder = new google.maps.Geocoder();
     var info_window = new google.maps.InfoWindow(); 
-    google.maps.event.addListener(map, 'idle', function(e){
-      //load all the markers in this area
-      var bounds = map.getBounds();
-      var locations  = $('.vcard').withinBounds(bounds);
-      if(locations.length < 100){
-        //remove markers from map and clear all listeners
-        $('.vcard').outsideBounds(bounds).unplot();
-        locations
-          .plot(map, function(){
-            console.log(this);
-            info_window.setContent('Hello');
-            info_window.open(map, this);
-          });
-      }else{
-        //too many locations
-      }
+    var locations = $('.vcard').hide();
+    
+    google.maps.event.addListener(info_window, 'closeclick', function(){
+      $('#ri-result-list .current').removeClass('current');
+    });
+    locations.eachWithMarker(function(marker, i, element){
+      marker.setMap(map);
+      google.maps.event.addListener(marker, 'click', function(){
+        info_window.setContent($(element).clone().show()[0]);
+        info_window.open(map, marker);
+        $('#ri-map').trigger('map.marker-clicked', [marker, element]);
+      });
     });
     
     map.setCenter(new google.maps.LatLng(-47,0));
@@ -86,23 +61,31 @@ function ri_map_style(){
         if (status == google.maps.GeocoderStatus.OK) {
           var result = results[0];
           map.setCenter(result.geometry.location);
-          map.setZoom(8);
-          $('.vcard')
-            .withinBounds(map.getBounds())
+          map.setZoom(14);
+          locations
             .eachByMiles(result.geometry.location, function(distance, index, element){
-              console.log(distance, index, element);
               //create the item to show as a result
+              
+              var result_list = $('#ri-map-search-results');
               var $e = $(element);
               var marker = $(element).toMarker()[0];
               var result_item = $("<div class='ri-map-result'>" + $e.html() + '</div>')
-                                  .append("<div class='ri-result-distance'>" + (Math.round(distance*10)/10) + "</div>")
-                                  .appendTo($('#ri-map-search-results'))
+                                  .append("<div class='ri-result-distance'>" + (Math.round(distance*10)/10) + " miles</div>")
+                                  .appendTo(result_list)
                                   .click(function(e){
+                                    if(marker.getMap() == null) marker.setMap(map);
                                     e.preventDefault();
-                                    console.log('Click');
                                     google.maps.event.trigger(marker, 'click');
                                   });
-              
+              $('#ri-map').bind('map.marker-clicked', function(event, clicked_marker){
+                //
+                console.log("cliced", clicked_marker, marker);
+                if(clicked_marker == marker){
+                  result_item.addClass('current');
+                }else{
+                  result_item.removeClass('current');
+                }
+              });
               
             })
         }else{

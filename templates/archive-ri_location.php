@@ -6,20 +6,27 @@ function ri_map_style(){
   ?>
 <style type="text/css" media="screen">
   
-  #ri-locations:after                 { content: '.'; clear:both; display:block; height:0; visibility:hidden; }
-  #ri-map                             { height:480px; float: right; width: 640px; }
-  #ri-map-search                      { float:left; width: 300px; background:#EEE; }
-  #ri-map-search-form                 { position:relative; margin-right:70px; }
-  #ri-search                          { display:block; width:100%; }
-  #ri-search-submit                   { position:absolute; right:-65px; top:0; }
-  #ri-map-search-results .current     { background:#FD999B; }
-  #ri-map-search-results .ri-map-result { padding:5px; position:relative; }
-  .ri-map-result a.url                  { display:block; font-size:14px;}
-  .ri-map-result .address             { display:block; }
-  .address .geo    { display:none; }
-  .ri-map-result .street-address     { display:block; }
-  .ri-map-result .country           { display:none; }
-  .ri-result-distance { position:absolute; top:2px; right:2px; background:#CCC;}
+#ri-locations:after                       { content: '.'; clear:both; display:block; height:0; visibility:hidden; }
+#ri-map                                   { height:480px; float: right; width: 640px; }
+#ri-map-search                            { float:left; width: 300px; background:#EEE; }
+#ri-map-search-form                       { position:relative; margin-right:70px; }
+#ri-search                                { display:block; width:100%; }
+#ri-search-submit                         { position:absolute; right:-65px; top:0; }
+#ri-map-search-results .current           { background:#FD999B; }
+#ri-map-search-results .ri-map-result     { padding:5px; position:relative; }
+#ri-map .vcard                            { width: 250px; margin:0 !important; }
+.ri-map-result a.url, #ri-map a.url       { display:block; font-size:14px; }
+.ri-map-result .address,
+  #ri-map .address                        { display:block; }
+.geo                             { display:none; }
+.ri-map-result .street-address,
+  #ri-map .street-address                 { display:block; }
+.ri-map-result .country,
+  #ri-map .country                        { display:none; }
+.ri-result-distance                       { position:absolute; top:2px; right:2px; background:#CCC; }
+.ri-map-result .about { display:none; }
+.about p  { margin:0; padding:0;}
+#ri-map .about  { margin:5px 0 0; padding:5px 0; border-top:1px solid #EEE; color:#666; }
 </style>
   <?php
 }
@@ -36,7 +43,7 @@ function ri_map_style(){
     });
     
     var geocoder = new google.maps.Geocoder();
-    var info_window = new google.maps.InfoWindow(); 
+    var info_window = new google.maps.InfoWindow({maxWidth:250}); 
     var locations = $('.vcard').hide();
     
     google.maps.event.addListener(info_window, 'closeclick', function(){
@@ -117,16 +124,20 @@ function ri_map_style(){
 
 <?php if( !have_posts() ):?>
   
-<?php else: while( have_posts() ): the_post(); ?>
-
+<?php else: ?>
+  
   <div id="locations-index">
+  <?php while( have_posts() ): the_post(); ?>
+
     <div class="vcard">
       <a class="url fn org" href="<?php the_permalink();?>"><?php the_title(); ?></a>
-      <span class="address">
-        <?php ri_formatted_address(); ?>
-        <?php ri_geo(); ?>
-      </span>
+      <?php ri_formatted_address(); ?>
+      <?php ri_geo(); ?>
+      <div class="about">
+        <?php the_excerpt(); ?>
+      </div>
     </div>
+  <?php endwhile; ?>
   </div>
-<?php endwhile; endif; ?>
+<?php endif; ?>
 <?php get_footer(); ?>

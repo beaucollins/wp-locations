@@ -27,7 +27,7 @@ function ri_init() {
       'name' => __( 'Locations' ),
       'singular_name' => __( 'Location' )
     ),
-    'supports' => array('title'),
+    'supports' => array('title', 'excerpt'),
     'menu_position' => 6,
     'description' => __( 'Physical locations that can be displayed on a map' ),
     'menu_icon' => plugin_dir_url(__FILE__) . 'images/icon.png',

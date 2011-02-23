@@ -63,6 +63,12 @@ function ri_index_template(){
   }  
 }
 
+add_action( 'activate_plugin', 'ri_refresh_rewrite_rules');
+
+function ri_refresh_rewrite_rules($plugin){
+  flush_rewrite_rules();
+}
+
 function is_ri_location_archive() {
   return !is_single() && get_query_var('post_type') == 'ri_location';
 }

@@ -47,6 +47,27 @@ function ri_map_style(){
     var info_window = new google.maps.InfoWindow({maxWidth:250}); 
     var locations = $('.vcard').hide();
     
+    var result_list = $('#ri-map-search-results');
+    locations.each(function(){
+      var $e = $(this);
+      var marker = $e.toMarker()[0];
+      var result_item = $("<div class='ri-map-result'>" + $e.html() + '</div>')
+                          .appendTo(result_list)
+                          .click(function(e){
+                            if(marker.getMap() == null) marker.setMap(map);
+                            e.preventDefault();
+                            google.maps.event.trigger(marker, 'click');
+                          });
+      $('#ri-map').bind('map.marker-clicked', function(event, clicked_marker){
+        //
+        if(clicked_marker == marker){
+          result_item.addClass('current');
+        }else{
+          result_item.removeClass('current');
+        }
+      });
+    })
+    
     google.maps.event.addListener(info_window, 'closeclick', function(){
       $('#ri-result-list .current').removeClass('current');
     });

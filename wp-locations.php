@@ -5,8 +5,7 @@ Plugin URI: http://github.com/beaucollins/wp-locations
 Description: Locations with a map
 Author: Beau Collins
 Author URI: http://github.com/beaucollins/
-Version: 0.1
-Stable tag: 0.1
+Version: 0.2
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
 

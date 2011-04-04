@@ -36,6 +36,13 @@ function ri_map_style(){
 <script type="text/javascript" charset="utf-8">
 (function($){
   $(document).ready(function(){
+    
+    var marker_image = false;
+    
+    <?php if(ri_use_custom_placemarker()): ?>
+    marker_image = "<?php echo ri_placemarker_image();?>";
+    <?php endif; ?>
+    
     <?php $default_map_view = ri_default_map_settings(); ?>
     var map = new google.maps.Map(document.getElementById('ri-map'), {
       'zoom' : <?php echo $default_map_view['zoom'] ;?>,
@@ -50,7 +57,7 @@ function ri_map_style(){
     var result_list = $('#ri-map-search-results');
     locations.each(function(){
       var $e = $(this);
-      var marker = $e.toMarker()[0];
+      var marker = $e.toMarker(false, {image:marker_image})[0];
       var result_item = $("<div class='ri-map-result'>" + $e.html() + '</div>')
                           .appendTo(result_list)
                           .click(function(e){
@@ -96,7 +103,7 @@ function ri_map_style(){
               
               var result_list = $('#ri-map-search-results');
               var $e = $(element);
-              var marker = $(element).toMarker()[0];
+              var marker = $(element).toMarker(false, {image:marker_image})[0];
               var result_item = $("<div class='ri-map-result'>" + $e.html() + '</div>')
                                   .append("<div class='ri-result-distance'>" + (Math.round(distance*10)/10) + " miles</div>")
                                   .appendTo(result_list)

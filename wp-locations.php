@@ -108,6 +108,15 @@ function ri_default_map_settings(){
   return get_option('ri-location-position', array('lat' => '38.13', 'lng' => '-94.13', 'zoom' => '3' ));
 }
 
+function ri_placemarker_image(){
+  return get_option('ri-placemarker-image', false);
+}
+
+function ri_use_custom_placemarker(){
+  $image = ri_placemarker_image();
+  return !empty($image);
+}
+
 function ri_location_for_post($post_id = nil){
   global $post;
   if($post_id === nil) $post_id = $post->ID;
@@ -137,13 +146,16 @@ function ri_location_settings(){
   
   if ( $_SERVER['REQUEST_METHOD'] == 'POST' && wp_verify_nonce( $_POST['rilocation_nonce'], plugin_basename(__FILE__) )  ) {
     $position = $_POST['riposition'];
+    $placemarker = $_POST['riplacemarker'];
     update_option('ri-location-position', $position);
+    update_option('ri-placemarker-image', $placemarker);
     ?>
     <div class="updated"><p><strong><?php _e('Location settings saved.', 'rilocation' ); ?></strong></p></div>    
+    
     <?php
   }else{
     $position = ri_default_map_settings();
-    
+    $placemarker = ri_placemarker_image();
   }
   
   ?>
@@ -214,6 +226,17 @@ function ri_location_settings(){
                 
               </script>
             </td>
+          </tr>
+          <tr>
+            <th scope="row">Custom Marker Image</th>
+            <td>
+              <?php if(ri_use_custom_placemarker()): ?>
+              <img src="<?php echo $placemarker; ?>">
+              <?php endif; ?>
+              <input type="text" name="riplacemarker" value="<?php echo $placemarker; ?>" size="80">
+              <span class="description">Image URL to use as map marker.</span>
+            </td>
+            
           </tr>
         </tbody>
       </table>

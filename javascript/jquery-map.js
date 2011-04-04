@@ -1,7 +1,9 @@
 (function($){
   
-  $.fn.toMarker = function(onMarkerClick){
-
+  $.fn.toMarker = function(onMarkerClick, options){
+    var settings = $.extend({
+      image:false
+    }, options);
     return this.map(function(){
       var $t = $(this);
 			var marker;
@@ -14,6 +16,11 @@
 	        title: address.name,
 	        position: new google.maps.LatLng(address.geo.lat, address.geo.lng),
 	      });
+	      
+	      if (settings.image) {
+	        marker.setIcon(settings.image);
+	      };
+	      
 	      $t.data('marker', marker);
 	  	}
       
